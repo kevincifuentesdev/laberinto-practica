@@ -15,7 +15,8 @@ class Laberinto:
         self.iteracion: int = 0
         self.matriz: List[List[Any]] = self._crear_laberinto(self.tamanno)
         self.salida: Tuple[int, int] = self._ubicar_salida()
-        self.persona: Persona = Persona(self._posicionar_persona())
+        # pasamos referencia entera al laberinto
+        self.persona: Persona = Persona(self._posicionar_persona(), self)
         self.bloqueo: List[Tuple[int, int]] = []
         self.trampas: List[Tuple[int, int]] = []
         self.retrasador: List[Tuple[int, int]] = []
@@ -43,8 +44,6 @@ class Laberinto:
             if self.matriz[y][x] == CAMINO:
                 self.matriz[y][x] = PERSONA
                 return (x, y)
-        
-
         
     def _verificar_posiciones_libres(self) -> None:
         libres: List[Tuple[int, int]] = []
@@ -83,16 +82,25 @@ class Laberinto:
         return True
     
     def _mover_persona(self) -> Tuple[int, int]:
-        movimiento_x, movimiento_y = random.choice(self.persona.posibles_movimientos)
-        actual_x, actual_y = self.persona.posicion_actual
-
-        posicion_futura = (movimiento_x + actual_x, movimiento_y + actual_y)
-
-        if self._es_posicion_valida(posicion_futura):
-            self.persona.posicion_actual = posicion_futura
-            return posicion_futura
-        
-        return self.persona.posicion_actual
+        # 1) recalcular ruta más corta desde la posición actual
+        self.persona.ruta_corta = self.persona._calcular_ruta_corta(self.persona.posicion_actual)
+        ruta = self.persona.ruta_corta.bfs()
+        if len(ruta) < 2:
+            return self.persona.posicion_actual
+        siguiente = ruta[1]
+        # 2) validar celda destino
+        if not self._es_posicion_valida(siguiente):
+            return self.persona.posicion_actual
+        # 3) actualizar matriz: limpiar vieja posición y poner PERSONA
+        ox, oy = self.persona.posicion_actual
+        nx, ny = siguiente
+        self.matriz[oy][ox] = CAMINO
+        self.matriz[ny][nx] = PERSONA
+        # 4) registrar movimiento
+        previo = self.persona.posicion_actual
+        self.persona.posicion_actual = siguiente
+        self.persona.rutas_tomadas.insert(previo, siguiente)
+        return siguiente
     
     def _ubicar_bloqueo(self) -> None:
         self._verificar_posiciones_libres()
