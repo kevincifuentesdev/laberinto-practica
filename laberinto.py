@@ -69,7 +69,9 @@ class Laberinto:
             return False
         
         if valor == TRAMPA:
-            self.persona._perder_movimiento()
+            perdida = self.persona._perder_movimiento()
+            if perdida:
+                print(f"\n¡Trampa! Se perdió el movimiento hacia {perdida}.")
             return True
         
         if valor == RETRASADOR:
@@ -85,17 +87,22 @@ class Laberinto:
         # 1) recalcular ruta más corta desde la posición actual
         self.persona.ruta_corta = self.persona._calcular_ruta_corta(self.persona.posicion_actual)
         ruta = self.persona.ruta_corta.bfs()
+
         if len(ruta) < 2:
             return self.persona.posicion_actual
+        
         siguiente = ruta[1]
+
         # 2) validar celda destino
         if not self._es_posicion_valida(siguiente):
             return self.persona.posicion_actual
+        
         # 3) actualizar matriz: limpiar vieja posición y poner PERSONA
         ox, oy = self.persona.posicion_actual
         nx, ny = siguiente
         self.matriz[oy][ox] = CAMINO
         self.matriz[ny][nx] = PERSONA
+        
         # 4) registrar movimiento
         previo = self.persona.posicion_actual
         self.persona.posicion_actual = siguiente
