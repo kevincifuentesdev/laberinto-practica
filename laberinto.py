@@ -15,7 +15,6 @@ class Laberinto:
         self.iteracion: int = 0
         self.matriz: List[List[Any]] = self._crear_laberinto(self.tamanno)
         self.salida: Tuple[int, int] = self._ubicar_salida()
-        # pasamos referencia entera al laberinto
         self.persona: Persona = Persona(self._posicionar_persona(), self)
         self.bloqueo: List[Tuple[int, int]] = []
         self.trampas: List[Tuple[int, int]] = []

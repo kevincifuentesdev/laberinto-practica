@@ -46,8 +46,8 @@ class GeneralTree:
         """
         if node.value == value:
             return node
-        for ch in node.children:
-            found = self._search(value, ch)
+        for child in node.children:
+            found = self._search(value, child)
             if found:
                 return found
         return None

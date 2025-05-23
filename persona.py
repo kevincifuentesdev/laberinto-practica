@@ -45,21 +45,21 @@ class Persona:
         found = False
 
         while queue:
-            cur = queue.pop(0)
+            current = queue.pop(0)
 
-            if cur == end:
+            if current == end:
                 found = True
                 break
 
             for dx, dy in self.posibles_movimientos:
-                nx, ny = cur[0] + dx, cur[1] + dy
+                nx, ny = current[0] + dx, current[1] + dy
 
                 if 0 <= nx < n and 0 <= ny < n:
                     val = self.laberinto.matriz[ny][nx]
 
                     if val != MURO and (nx, ny) not in visited:
                         visited.add((nx, ny))
-                        parent[(nx, ny)] = cur
+                        parent[(nx, ny)] = current
                         queue.append((nx, ny))
 
         if not found:
