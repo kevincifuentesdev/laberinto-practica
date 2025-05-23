@@ -76,7 +76,7 @@ def main():
         elif opc == "8":
             if iniciado:
                 print("\nÁrbol de movimientos tomados:")
-                lab.persona.rutas_tomadas.display()
+                lab.persona.rutas_tomadas.display()  # Muestra el árbol de decisiones
                 print("\n")
             else:
                 print("Debe iniciar simulación primero.\n")
@@ -85,7 +85,7 @@ def main():
                 # Recalcular árbol de ruta corta según el laberinto actual
                 lab.persona.ruta_corta = lab.persona._calcular_ruta_corta(lab.persona.posicion_actual)
                 print("\nÁrbol de ruta más corta:")
-                lab.persona.ruta_corta.display()
+                lab.persona.ruta_corta.display()  # Muestra el árbol de la ruta más corta
                 print("\n")
             else:
                 print("Debe iniciar simulación primero.\n")

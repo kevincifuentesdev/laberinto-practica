@@ -53,17 +53,26 @@ class GeneralTree:
         return None
 
     def display(self) -> None:
+        """
+        Muestra el árbol en consola con información adicional sobre las decisiones.
+        """
         if self.root is None:
             print("Tree is empty")
             return
-        print(self.root.value)
-        for i, child in enumerate(self.root.children):
-            is_last = i == len(self.root.children) - 1
-            self._display_tree(child, "", is_last)
+        self._display_tree(self.root, "", True)
 
     def _display_tree(self, node: Node, prefix: str, is_last: bool) -> None:
+        """
+        Muestra un nodo y sus hijos en formato jerárquico.
+        """
         connector = "└── " if is_last else "├── "
-        print(f"{prefix}{connector}{node.value}")
+        value = node.value
+        if isinstance(value, tuple) and len(value) == 2:
+            posicion, elegida = value
+            estado = "✔" if elegida else "✘"
+            print(f"{prefix}{connector}Celda {posicion} ({estado})")
+        else:
+            print(f"{prefix}{connector}{value}")
         new_prefix = prefix + ("    " if is_last else "│   ")
         for i, child in enumerate(node.children):
             is_last_child = i == len(node.children) - 1

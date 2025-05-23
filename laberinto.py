@@ -84,6 +84,9 @@ class Laberinto:
         return True
     
     def _mover_persona(self) -> Tuple[int, int]:
+        """
+        Mueve a la persona en el laberinto, actualizando la matriz y registrando decisiones.
+        """
         # 1) recalcular ruta más corta desde la posición actual
         self.persona.ruta_corta = self.persona._calcular_ruta_corta(self.persona.posicion_actual)
         ruta = self.persona.ruta_corta.bfs()
@@ -93,20 +96,28 @@ class Laberinto:
         
         siguiente = ruta[1]
 
-        # 2) validar celda destino
+        # 2) calcular alternativas desde la posición actual
+        alternativas = [
+            (self.persona.posicion_actual[0] + dx, self.persona.posicion_actual[1] + dy)
+            for dx, dy in self.persona.posibles_movimientos
+            if 0 <= self.persona.posicion_actual[0] + dx < self.tamanno and 0 <= self.persona.posicion_actual[1] + dy < self.tamanno
+        ]
+
+        # 3) validar celda destino
         if not self._es_posicion_valida(siguiente):
             return self.persona.posicion_actual
         
-        # 3) actualizar matriz: limpiar vieja posición y poner PERSONA
+        # 4) actualizar matriz: limpiar vieja posición y poner PERSONA
         ox, oy = self.persona.posicion_actual
         nx, ny = siguiente
         self.matriz[oy][ox] = CAMINO
         self.matriz[ny][nx] = PERSONA
-        
-        # 4) registrar movimiento
-        previo = self.persona.posicion_actual
+
+        # Registrar movimiento en el árbol de decisiones
+        self.persona.registrar_decision((ox, oy), (nx, ny), alternativas)
+
+        # Actualizar posición de la persona
         self.persona.posicion_actual = siguiente
-        self.persona.rutas_tomadas.insert(previo, siguiente)
         return siguiente
     
     def _ubicar_bloqueo(self) -> None:
