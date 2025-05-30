@@ -1,6 +1,5 @@
 from typing import List, Tuple
 import random
-import heapq
 from arbol_general import GeneralTree, Node
 
 # Constantes
@@ -11,18 +10,28 @@ personaje = "P"
 camino = '.'
 salida = 'S'
 
+class EmptyQueue(Exception):
+    pass
+
 class PriorityQueue:
-    def __init__(self):
-        self.data = []
+    def __init__(self, priority: str = "min"):
+        self.__queue: List[Tuple[int, Tuple[int, int], List[Tuple[int, int]]]] = []
+        self.__priority = priority
 
-    def push(self, item):
-        heapq.heappush(self.data, item)
+    def push(self, item: Tuple[int, Tuple[int, int], List[Tuple[int, int]]]):
+        self.__queue.append(item)
+        if self.__priority == "min":
+            self.__queue.sort(key=lambda x: x[0])
+        elif self.__priority == "max":
+            self.__queue.sort(key=lambda x: x[0], reverse=True)
 
-    def pop(self):
-        return heapq.heappop(self.data)
+    def pop(self) -> Tuple[int, Tuple[int, int], List[Tuple[int, int]]]:
+        if not self.__queue:
+            raise EmptyQueue("Cola Vacía...")
+        return self.__queue.pop(0)
 
     def __len__(self):
-        return len(self.data)
+        return len(self.__queue)
 
 class Laberinto:
     def __init__(self, size=5, num_personas=1, num_salidas=2):
@@ -102,7 +111,7 @@ class Personaje:
 
     def obtener_ruta_mas_corta(self, lab: Laberinto):
         visited = set()
-        priority_queue = PriorityQueue()
+        priority_queue = PriorityQueue("min")
         priority_queue.push((0, self.posicion, [self.posicion]))
         found = False
 
@@ -126,6 +135,7 @@ class Personaje:
 
         if not found:
             self.ruta_mas_corta = []
+
 
 def mostrar_menu():
     print("1) Iniciar simulación")
