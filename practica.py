@@ -18,7 +18,7 @@ class PriorityQueue:
         self.__queue: List[Tuple[int, Tuple[int, int], List[Tuple[int, int]]]] = []
         self.__priority = priority
 
-    def push(self, item: Tuple[int, Tuple[int, int], List[Tuple[int, int]]]):
+    def push(self, item: Tuple[int, Tuple[int, int], List[Tuple[int, int]]] ):
         self.__queue.append(item)
         if self.__priority == "min":
             self.__queue.sort(key=lambda x: x[0])
@@ -59,6 +59,8 @@ class Laberinto:
         for _ in range(self.num_personas):
             p = self._iniciar_personaje()
             self.personas.append(p)
+            p.obtener_ruta_mas_corta(self)
+            p.crear_arbol_ruta_mas_corta()
 
     def _iniciar_personaje(self):
         while True:
@@ -108,6 +110,7 @@ class Personaje:
         self.ruta_mas_corta: List[tuple] = []
         self.arbol_decisiones = GeneralTree()
         self.arbol_decisiones.root = Node(self.posicion)
+        self.arbol_ruta_mas_corta = GeneralTree()
 
     def obtener_ruta_mas_corta(self, lab: Laberinto):
         visited = set()
@@ -136,6 +139,15 @@ class Personaje:
         if not found:
             self.ruta_mas_corta = []
 
+    def crear_arbol_ruta_mas_corta(self):
+        if not self.ruta_mas_corta:
+            print("No hay ruta más corta para crear el árbol.")
+            return
+        self.arbol_ruta_mas_corta = GeneralTree()
+        self.arbol_ruta_mas_corta.root = Node(self.ruta_mas_corta[0])
+        for i in range(1, len(self.ruta_mas_corta)):
+            self.arbol_ruta_mas_corta.insert(self.ruta_mas_corta[i - 1], self.ruta_mas_corta[i])
+
 
 def mostrar_menu():
     print("1) Iniciar simulación")
@@ -147,6 +159,8 @@ def mostrar_menu():
     print("7) Salir")
     print("8) Ver árbol de movimientos")
     print("9) Ver ruta más corta")
+    print("10) Ver árbol de ruta más corta")
+
 
 def main():
     tamaño = int(input("Tamaño del laberinto: "))
@@ -183,6 +197,7 @@ def main():
             eliminados = []
             for p in lab.personas:
                 p.obtener_ruta_mas_corta(lab)
+                p.crear_arbol_ruta_mas_corta()
 
                 if not p.ruta_mas_corta or len(p.ruta_mas_corta) < 2:
                     print(f"Persona en {p.posicion} ya alcanzó su destino o no tiene ruta.")
@@ -203,7 +218,7 @@ def main():
                 print(f"Persona se movió a {nueva_pos}")
 
                 if nueva_pos in lab.salidas:
-                    print(f"🎉 Persona llegó a la salida en {nueva_pos} y ha sido eliminada.")
+                    print(f" Persona llegó a la salida en {nueva_pos}")
                     lab.laberinto[nueva_pos[0]][nueva_pos[1]] = salida
                     eliminados.append(p)
 
@@ -213,7 +228,7 @@ def main():
             print("\n" + str(lab) + "\n")
 
             if len(lab.personas) == 0:
-                print("✅ Todos los personajes han salido del laberinto. Simulación terminada.")
+                print("Todos los personajes han salido del laberinto. Simulación terminada.")
                 break
 
         elif opc == "7":
@@ -239,9 +254,18 @@ def main():
                 print(p.ruta_mas_corta)
             print()
 
+        elif opc == "10":
+            if not iniciado:
+                print("Debe iniciar primero.\n")
+                continue
+            for i, p in enumerate(lab.personas, 1):
+                p.crear_arbol_ruta_mas_corta()
+                print(f"\nÁrbol de ruta más corta Persona {i}:")
+                p.arbol_ruta_mas_corta.display()
+            print()
+
         else:
             print("Opción inválida.\n")
 
 if __name__ == "__main__":
     main()
-
