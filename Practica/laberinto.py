@@ -1,5 +1,5 @@
 from typing import List, Tuple, Any
-from persona import Persona
+from Practica.persona import Persona
 import random
 
 MURO = 'X'; CAMINO = ' '; TRAMPA = 'T'; RETRASADOR = 'R'
@@ -9,7 +9,7 @@ class Laberinto:
     """
     Representa un laberinto cuadrado con muros, trampas, retrasadores y múltiples personas.
     """
-    def __init__(self, size: int, num_personas: int = 2) -> None:
+    def __init__(self, size: int, num_personas: int = 1) -> None:
         """
         size: dimensión del laberinto NxN.
         num_personas: cantidad de agentes exploradores.
@@ -39,7 +39,7 @@ class Laberinto:
 
         posiciones_salida = []
 
-        while salidas < 2:
+        while salidas < 1:
             x = random.randint(0, self.tamanno - 1)
             y = random.randint(0, self.tamanno - 1)
 
@@ -87,7 +87,8 @@ class Laberinto:
             x = random.randint(0, self.tamanno - 1)
             y = random.randint(0, self.tamanno - 1)
         valor = self.matriz[y][x]
-        # impedir solapamiento con otras personas
+        
+        # impedir chocarse con otras personas
         if valor == PERSONA:
             return False
 
@@ -115,7 +116,7 @@ class Laberinto:
         Actualiza matriz y registra movimiento en su árbol.
         """
         # 1) recalcular ruta más corta para esta persona
-        persona.ruta_corta = persona._calcular_ruta_salida_corta(persona.posicion_actual, self.salida)
+        persona.ruta_corta = persona.obtener_ruta_mas_corta(persona.posicion_actual, self.salida)
         ruta = persona.ruta_corta.bfs()
 
         if len(ruta) < 2:
@@ -166,7 +167,7 @@ class Laberinto:
         self.trampas.append((x, y))
         for p in self.personas:
             p.arbol_rutas_todas = p._calcular_arbol_rutas_todas(
-                p.posicion_actual, self.salida)
+                p.posicarbol_rutas_todasion_actual, self.salida)
 
     def _ubicar_retrasador(self) -> None:
         self._verificar_posiciones_libres()

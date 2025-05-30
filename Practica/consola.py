@@ -1,4 +1,4 @@
-from laberinto import Laberinto
+from Practica.laberinto import Laberinto
 
 def mostrar_menu() -> None:
     """Muestra las opciones disponibles para el usuario."""
@@ -20,7 +20,7 @@ def main():
     Punto de entrada: configura el laberinto, procesa el menú y despliega resultados.
     """
     tamaño = int(input("Ingrese tamaño del laberinto: "))
-    lab = Laberinto(tamaño, num_personas=2)
+    lab = Laberinto(tamaño, num_personas=1)
     iniciado = False
 
     while True:
@@ -93,7 +93,7 @@ def main():
         elif opc == "9":
             if iniciado:
                 for idx, p in enumerate(lab.personas, 1):
-                    p.ruta_corta = p._calcular_ruta_salida_corta(p.posicion_actual, lab.salida)
+                    p.ruta_corta = p.obtener_ruta_mas_corta(p.posicion_actual, lab.salida)
                     print(f"\nÁrbol ruta más corta Persona {idx}:")
                     p.ruta_corta.display()
                 print("\n")
