@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 import random
 import heapq
+from arbol_general import GeneralTree, Node
 
 # Constantes
 muro = "X"
@@ -83,6 +84,7 @@ class Laberinto:
             self.laberinto[px][py] = salida
         else:
             self.laberinto[px][py] = camino
+        persona.arbol_decisiones.insert((px, py), (nx, ny))
         persona.posicion = (nx, ny)
         self.laberinto[nx][ny] = personaje
         return persona.posicion
@@ -93,22 +95,27 @@ class Laberinto:
 class Personaje:
     def __init__(self, posicion):
         self.posicion = posicion
-        self.direcciones = [(1,0), (0,1), (-1,0), (0,-1)]
+        self.direcciones = [(1, 0), (0, 1), (-1, 0), (0, -1)]
         self.ruta_mas_corta: List[tuple] = []
+        self.arbol_decisiones = GeneralTree()
+        self.arbol_decisiones.root = Node(self.posicion)
 
     def obtener_ruta_mas_corta(self, lab: Laberinto):
         visited = set()
         priority_queue = PriorityQueue()
-        priority_queue.push((0, self.posicion, [self.posicion]))  
+        priority_queue.push((0, self.posicion, [self.posicion]))
+        found = False
 
-        while priority_queue:
+        while len(priority_queue) > 0:
             costo, posicion, ruta = priority_queue.pop()
             if posicion in visited:
                 continue
             visited.add(posicion)
             if posicion in lab.salidas:
                 self.ruta_mas_corta = ruta
-                return
+                found = True
+                break
+
             x, y = posicion
             for dx, dy in self.direcciones:
                 nx, ny = x + dx, y + dy
@@ -117,7 +124,8 @@ class Personaje:
                     if valor != muro and (nx, ny) not in visited:
                         priority_queue.push((costo + 1, (nx, ny), ruta + [(nx, ny)]))
 
-        self.ruta_mas_corta = []  
+        if not found:
+            self.ruta_mas_corta = []
 
 def mostrar_menu():
     print("1) Iniciar simulación")
@@ -127,6 +135,7 @@ def mostrar_menu():
     print("5) Mostrar laberinto")
     print("6) Avanzar iteración")
     print("7) Salir")
+    print("8) Ver árbol de movimientos")
     print("9) Ver ruta más corta")
 
 def main():
@@ -167,25 +176,25 @@ def main():
 
                 if not p.ruta_mas_corta or len(p.ruta_mas_corta) < 2:
                     print(f"Persona en {p.posicion} ya alcanzó su destino o no tiene ruta.")
-                    eliminados.append(p)
+                    if p.posicion in lab.salidas:
+                        eliminados.append(p)
                     continue
 
-                p.ruta_mas_corta.pop(0)
-                nueva_pos = p.ruta_mas_corta[0]
+                nueva_pos = p.ruta_mas_corta[1]
                 px, py = p.posicion
                 if (px, py) in lab.salidas:
                     lab.laberinto[px][py] = salida
                 else:
                     lab.laberinto[px][py] = camino
-                nx, ny = nueva_pos
-                p.posicion = (nx, ny)
-                lab.laberinto[nx][ny] = personaje
 
+                lab.laberinto[nueva_pos[0]][nueva_pos[1]] = personaje
+                p.arbol_decisiones.insert((px, py), nueva_pos)
+                p.posicion = nueva_pos
                 print(f"Persona se movió a {nueva_pos}")
 
-                if (nx, ny) in lab.salidas:
-                    print(f"🎉 Persona llegó a la salida en {nx, ny} y ha sido eliminada.")
-                    lab.laberinto[nx][ny] = salida
+                if nueva_pos in lab.salidas:
+                    print(f"🎉 Persona llegó a la salida en {nueva_pos} y ha sido eliminada.")
+                    lab.laberinto[nueva_pos[0]][nueva_pos[1]] = salida
                     eliminados.append(p)
 
             for p in eliminados:
@@ -193,13 +202,22 @@ def main():
 
             print("\n" + str(lab) + "\n")
 
-            if not lab.personas:
+            if len(lab.personas) == 0:
                 print("✅ Todos los personajes han salido del laberinto. Simulación terminada.")
                 break
 
         elif opc == "7":
             print("Saliendo...")
             break
+
+        elif opc == "8":
+            if iniciado:
+                for idx, p in enumerate(lab.personas, 1):
+                    print(f"\nÁrbol movimientos Persona {idx}:")
+                    p.arbol_decisiones.display()
+                print("\n")
+            else:
+                print("Debe iniciar simulación primero.\n")
 
         elif opc == "9":
             if not iniciado:
@@ -216,3 +234,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
