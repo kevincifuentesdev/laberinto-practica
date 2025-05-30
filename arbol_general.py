@@ -1,89 +1,72 @@
 from typing import Any, List, Optional
 
 class Node:
-    """Nodo de árbol con valor y lista de hijos."""
     def __init__(self, value: Any) -> None:
         self.value = value
         self.children: List['Node'] = []
 
 class GeneralTree:
     def __init__(self) -> None:
-
         self.root: Optional[Node] = None
 
-    def bfs(self) -> List[Any]:
-        if self.root is None:
-            return []
-        result: List[Any] = []
-        queue: List[Node] = [self.root]
-        while queue:
-            node = queue.pop(0)
-            result.append(node.value)
-            queue.extend(node.children)
-        return result
-
-    def dfs(self) -> List[Any]:
-        def _dfs(node: Node, acc: List[Any]) -> None:
-            acc.append(node.value)
-            for child in node.children:
-                _dfs(child, acc)
-
-        if self.root is None:
-            return []
-        result: List[Any] = []
-        _dfs(self.root, result)
-        return result
-
     def insert(self, parent_value: Any, child_value: Any) -> bool:
+        """Inserta child_value como hijo de parent_value (crea root si está vacío)."""
         if self.root is None:
             self.root = Node(parent_value)
             self.root.children.append(Node(child_value))
             return True
-
         parent_node = self.search(parent_value)
         if parent_node is None:
             return False
-
         parent_node.children.append(Node(child_value))
         return True
 
     def search(self, value: Any) -> Optional[Node]:
+        """Busca un nodo cuyo .value sea value."""
         def _search(node: Node) -> Optional[Node]:
             if node.value == value:
                 return node
             for ch in node.children:
-                found = _search(ch)
-                if found:
-                    return found
+                res = _search(ch)
+                if res:
+                    return res
             return None
-
         return _search(self.root) if self.root else None
+    
+    def find_path(self, target: Any) -> List[Any]:
+        """
+        Devuelve la ruta (lista de .value) desde la raíz hasta el nodo que contiene `target`.
+        Si no se encuentra, devuelve [].
+        """
+        if self.root is None:
+            return []
+        
+        queue = [(self.root, [self.root.value])]  # Tupla: (nodo, camino hasta aquí)
+        
+        while queue:
+            current, path = queue.pop(0)
+            if current.value == target:
+                return path
+            for child in current.children:
+                queue.append((child, path + [child.value]))
+        
+        return []
+
 
     def display(self) -> None:
-        if self.root is None:
+        """Imprime el árbol en formato ascii."""
+        if not self.root:
             print("Tree is empty")
             return
         print(self.root.value)
-        for i, child in enumerate(self.root.children):
-            is_last = i == len(self.root.children) - 1
-            self._display_tree(child, "", is_last)
+        for i, ch in enumerate(self.root.children):
+            last = (i == len(self.root.children)-1)
+            self._display_tree(ch, "", last)
 
     def _display_tree(self, node: Node, prefix: str, is_last: bool) -> None:
-        connector = "└── " if is_last else "├── "
-        print(f"{prefix}{connector}{node.value}")
-        new_prefix = prefix + ("    " if is_last else "│   ")
-        for i, child in enumerate(node.children):
-            is_last_child = i == len(node.children) - 1
-            self._display_tree(child, new_prefix, is_last_child)
-
-    def node_count(self) -> int:
-        
-        def _count(node: Node) -> int:
-            return 1 + sum(_count(child) for child in node.children)
-
-        return _count(self.root) if self.root else 0
-
-
-    def length(self) -> int:
-        """Alias para node_count."""
-        return self.node_count()
+        conn = "└── " if is_last else "├── "
+        print(f"{prefix}{conn}{node.value}")
+        new_pref = prefix + ("    " if is_last else "│   ")
+        for i, ch in enumerate(node.children):
+            last = (i == len(node.children)-1)
+            self._display_tree(ch, new_pref, last)

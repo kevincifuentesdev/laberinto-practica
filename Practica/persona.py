@@ -1,6 +1,8 @@
 from typing import List, Tuple, Optional, Any, Set
 from random import randint
 from arbol_general import GeneralTree, Node
+from typing import Any, List, Optional
+
 
 MURO = 'X'
 DIRECCIONES = [(0, -1), (0, 1), (1, 0), (-1, 0)]
